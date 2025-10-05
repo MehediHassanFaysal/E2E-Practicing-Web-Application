@@ -1,0 +1,170 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+}
+.login-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    position: relative;
+}
+.login-container h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.form-group input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+.form-group input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+.form-group select {
+    width: 100%; /* Ensure the select field takes full width of the .form-group container */
+    /* max-width: 300px; Optional: Set a maximum width for the select field */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    /* margin: 0 auto; Center the select field horizontally */
+    display: block; /* Make sure it's a block element to use margin auto */
+}
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+.forgot-password {
+    margin-top: 10px;
+    font-size: 14px;
+}
+.forgot-password a {
+    color: #007bff;
+    text-decoration: none;
+}
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+/* Registration Popup Styles */
+.toggle-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 1001;
+}
+.popup {
+    position: fixed;
+    top: 0;
+    right: -100%; /* Initially hidden to the right side */
+    width: 300px;
+    height: 100%;
+    background: #fff;
+    border-left: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: right 0.3s ease;
+    z-index: 1000;
+}
+.popup.active {
+    right: 0; /* Slide in from the right */
+}
+.popup-content {
+    padding: 20px;
+    height: 100%;
+    overflow-y: auto;
+}
+.popup-content h1 {
+    margin-top: 0;
+}
+.popup-content form {
+    display: flex;
+    flex-direction: column;
+}
+.popup-content label {
+    margin-bottom: 5px;
+}
+.popup-content input {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+.popup-content button {
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.popup-content button:hover {
+    background-color: #0056b3;
+}
+
+.alert-fail {
+    position: fixed;
+    top: 20px; /* Distance from the top of the page */
+    right: 20px; /* Distance from the right edge of the page */
+    background-color: #f44336; /* Red background color for alert */
+    color: white; /* White text color */
+    padding: 15px; /* Padding inside the alert */
+    border-radius: 5px; /* Rounded corners */
+    z-index: 1000; /* Ensure it appears above other content */
+    display: none; /* Hidden by default */
+}
+
+.alert-fail.show {
+    display: block; /* Show alert */
+}
+.alert-success {
+    position: fixed;
+    top: 20px; /* Distance from the top of the page */
+    right: 20px; /* Distance from the right edge of the page */
+    background-color: #58d68d; /* Sky-blue background color for alert */
+    color: white; /* White text color */
+    padding: 15px; /* Padding inside the alert */
+    border-radius: 5px; /* Rounded corners */
+    z-index: 1000; /* Ensure it appears above other content */
+    display: none; /* Hidden by default */
+}
+
+.alert-success.show {
+    display: block; /* Show alert */
+}

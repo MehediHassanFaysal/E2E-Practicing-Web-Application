@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Multi-Step Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            background-color: #f0f0f0;
+        }
+
+        .steps {
+            list-style: none;
+            padding: 10px 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: center;
+        }
+
+        .steps li {
+            position: relative;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .steps li:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -10px;
+            width: 20px;
+            height: 2px;
+            background-color: #007bff;
+            transform: translateY(-50%);
+        }
+
+        .steps li.active {
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 10px;
+        }
+
+        .section {
+            display: none;
+            padding: 20px;
+            text-align: center;
+            background-color: #fcfcfc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 70%;
+            position: absolute;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        input[type="text"] {
+            display: block;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 22px); /* Adjust width considering padding and border */
+        }
+
+        .navigation {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 10px;
+            border: none;
+            border-radius: 2px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #submitButton {
+            background-color: #28a745;
+        }
+
+        #submitButton:hover {
+            background-color: #218838;
+        }
+
+        .review-section {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px; /* Ensure spacing before the submit button */
+        }
+
+        .review-section h2 {
+            margin-bottom: 20px;
+        }
+
+        .review-section p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <ul class="steps">
+            <li id="step1" class="active">Step 1</li>
+            <li id="step2">Step 2</li>
+            <li id="step3">Step 3</li>
+        </ul>
+    </div>
+    <form id="multiStepForm" action="/submit-form" method="POST">
+        <div class="main-container">
+            <!-- Section 1 -->
+            <div class="section active" id="section1">
+                <h1>Section 1</h1>
+                <p>This is the content of Section 1.</p>
+                <input type="text" id="input1-1" name="input1-1" placeholder="Input 1-1">
+                <input type="text" id="input1-2" name="input1-2" placeholder="Input 1-2">
+                <div class="navigation">
+                    <button type="button" id="prevButton1" class="btn btn-outline-warning">Previous</button>
+                    <button type="button" id="nextButton1" class="btn btn-outline-secondary">Next</button>
+                </div>
+            </div>
+            
+            <!-- Section 2 -->
+            <div class="section" id="section2">
+                <h1>Section 2</h1>
+                <p>This is the content of Section 2.</p>
+                <input type="text" id="input2-1" name="input2-1" placeholder="Input 2-1">
+                <input type="text" id="input2-2" name="input2-2" placeholder="Input 2-2">
+                <div class="navigation">
+                    <button type="button" id="prevButton2" class="btn btn-outline-warning">Previous</button>
+                    <button type="button" id="nextButton2" class="btn btn-outline-secondary">Next</button>
+                </div>
+            </div>
+            
+            <!-- Section 3 -->
+            <div class="section" id="section3">
+                <h1>Section 3</h1>
+                <p>This is the content of Section 3.</p>
+                <div id="reviewSection"></div> <!-- Review results will be displayed here -->
+                <div class="navigation">
+                    <button type="button" id="prevButton3" class="btn btn-outline-warning">Previous</button>
+                    <button type="submit" id="submitButton" style="display:none;" class="btn btn-outline-success">Submit</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script>
+        let currentSection = 1;
+        const totalSections = 3;
+
+        document.getElementById('nextButton1').addEventListener('click', showNextSection);
+        document.getElementById('prevButton1').addEventListener('click', showPreviousSection);
+        document.getElementById('nextButton2').addEventListener('click', showNextSection);
+        document.getElementById('prevButton2').addEventListener('click', showPreviousSection);
+        document.getElementById('prevButton3').addEventListener('click', showPreviousSection);
+        document.getElementById('submitButton').addEventListener('click', submitForm);
+
+        function showNextSection() {
+            document.getElementById(`section${currentSection}`).classList.remove('active');
+            document.getElementById(`step${currentSection}`).classList.remove('active');
+            
+            currentSection++;
+            if (currentSection > totalSections) {
+                currentSection = 1;
+            }
+
+            document.getElementById(`section${currentSection}`).classList.add('active');
+            document.getElementById(`step${currentSection}`).classList.add('active');
+
+            updateButtons();
+            updateReviewSection(); // Update review section when moving to the last section
+        }
+
+        function showPreviousSection() {
+            document.getElementById(`section${currentSection}`).classList.remove('active');
+            document.getElementById(`step${currentSection}`).classList.remove('active');
+            
+            currentSection--;
+            if (currentSection < 1) {
+                currentSection = totalSections;
+            }
+
+            document.getElementById(`section${currentSection}`).classList.add('active');
+            document.getElementById(`step${currentSection}`).classList.add('active');
+
+            updateButtons();
+            updateReviewSection(); // Update review section when moving to the last section
+        }
+
+        function updateButtons() {
+            const isLastSection = currentSection === totalSections;
+            document.getElementById('nextButton1').style.display = currentSection === 1 ? 'inline-block' : 'none';
+            document.getElementById('nextButton2').style.display = currentSection === 2 ? 'inline-block' : 'none';
+            document.getElementById('prevButton1').style.display = currentSection === 1 ? 'none' : 'inline-block';
+            document.getElementById('prevButton2').style.display = currentSection === 2 ? 'inline-block' : 'none';
+            document.getElementById('submitButton').style.display = isLastSection ? 'inline-block' : 'none';
+        }
+
+        function updateReviewSection() {
+            if (currentSection === totalSections) {
+                const reviewSection = document.getElementById('reviewSection');
+                const input1_1 = document.getElementById('input1-1').value;
+                const input1_2 = document.getElementById('input1-2').value;
+                const input2_1 = document.getElementById('input2-1').value;
+                const input2_2 = document.getElementById('input2-2').value;
+                const input3_1 = document.getElementById('input3-1') ? document.getElementById('input3-1').value : '';
+                const input3_2 = document.getElementById('input3-2') ? document.getElementById('input3-2').value : '';
+
+                reviewSection.innerHTML = `
+                    <h2>Review Results</h2>
+                    <p><strong>Step 1:</strong> Input 1-1: ${input1_1} | Input 1-2: ${input1_2}</p>
+                    <p><strong>Step 2:</strong> Input 2-1: ${input2_1} | Input 2-2: ${input2_2}</p>
+                    <p><strong>Step 3:</strong> Input 3-1: ${input3_1} | Input 3-2: ${input3_2}</p>
+                `;
+            }
+        }
+
+        function submitForm() {
+            alert('Form submitted!');
+            document.getElementById('multiStepForm').submit(); // Submit the form
+        }
+
+        // Initialize the first section as active
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById(`section${currentSection}`).classList.add('active');
+            document.getElementById(`step${currentSection}`).classList.add('active');
+            updateButtons();
+        });
+    </script>
+</body>
+</html>
+
+
+
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                Intruducer Information
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Introducer Account:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input3_1}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Introducer Name:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input3_2}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Introducer NID:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input3_3}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Introducer Mobile Number:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input3_4}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Remarks:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input3_5}</td>
+        </tr>
+    </tbody>
+</table>
+<br>
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                Account Information
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Account Type:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input4_1}</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #fff; padding: 8px;">Amount:</td>
+            <td style="border: 1px solid #fff; padding: 8px;">${input4_2}</td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+<script>
+    let currentSection = 1;
+    const totalSections = 5;
+
+    // Event listeners for navigation buttons
+    document.getElementById('nextButton1').addEventListener('click', showNextSection);
+    document.getElementById('prevButton1').addEventListener('click', showPreviousSection);
+    document.getElementById('nextButton2').addEventListener('click', showNextSection);
+    document.getElementById('prevButton2').addEventListener('click', showPreviousSection);
+    document.getElementById('nextButton3').addEventListener('click', showNextSection);
+    document.getElementById('prevButton3').addEventListener('click', showPreviousSection);
+    document.getElementById('nextButton4').addEventListener('click', showNextSection);
+    document.getElementById('prevButton4').addEventListener('click', showPreviousSection);
+    document.getElementById('prevButton5').addEventListener('click', showPreviousSection);
+    document.getElementById('submitButton').addEventListener('click', submitForm);
+
+    function validateSection() {
+        const inputs = document.querySelectorAll(`#section${currentSection} input[required], #section${currentSection} select[required]`);
+        let valid = true;
+        inputs.forEach(input => {
+            if (!input.checkValidity()) {
+                valid = false;
+                input.reportValidity(); // Display validation message
+            }
+        });
+        return valid;
+    }
+
+    function showNextSection() {
+        if (!validateSection()) {
+            return; // Prevent moving to the next section if validation fails
+        }
+
+        document.getElementById(`section${currentSection}`).classList.remove('active');
+        document.getElementById(`step${currentSection}`).classList.remove('active');
+        
+        currentSection++;
+        if (currentSection > totalSections) {
+            currentSection = 1;
+        }
+
+        document.getElementById(`section${currentSection}`).classList.add('active');
+        document.getElementById(`step${currentSection}`).classList.add('active');
+
+        updateButtons();
+        updateReviewSection(); // Update review section when moving to the last section
+    }
+
+    function showPreviousSection() {
+        document.getElementById(`section${currentSection}`).classList.remove('active');
+        document.getElementById(`step${currentSection}`).classList.remove('active');
+        
+        currentSection--;
+        if (currentSection < 1) {
+            currentSection = totalSections;
+        }
+
+        document.getElementById(`section${currentSection}`).classList.add('active');
+        document.getElementById(`step${currentSection}`).classList.add('active');
+
+        updateButtons();
+        updateReviewSection(); // Update review section when moving to the last section
+    }
+
+    function updateButtons() {
+        // Set display for next and previous buttons based on the current section
+        document.getElementById('nextButton1').style.display = currentSection === 1 ? 'inline-block' : 'none';
+        document.getElementById('nextButton2').style.display = currentSection === 2 ? 'inline-block' : 'none';
+        document.getElementById('nextButton3').style.display = currentSection === 3 ? 'inline-block' : 'none';
+        document.getElementById('nextButton4').style.display = currentSection === 4 ? 'inline-block' : 'none';
+        document.getElementById('submitButton').style.display = currentSection === totalSections ? 'inline-block' : 'none';
+        
+        document.getElementById('prevButton1').style.display = currentSection === 1 ? 'none' : 'inline-block';
+        document.getElementById('prevButton2').style.display = currentSection === 2 ? 'inline-block' : 'none';
+        document.getElementById('prevButton3').style.display = currentSection === 3 ? 'inline-block' : 'none';
+        document.getElementById('prevButton4').style.display = currentSection === 4 ? 'inline-block' : 'none';
+    }
+
+    function updateReviewSection() {
+        if (currentSection === totalSections) {
+            const reviewSection = document.getElementById('reviewSection');
+            
+            // Fetch all input values
+            const inputs = {
+                member_code: document.getElementById('input1-1').value,
+                mobile_number: document.getElementById('input1-2').value,
+                nation_id_card: document.getElementById('input1-3').value,
+                dob: document.getElementById('input1-4').value,
+                occupation: document.getElementById('input1-5').value,
+                anual_income: document.getElementById('input1-6').value,
+                present_address: document.getElementById('input1-7').value,
+                permanent_address: document.getElementById('input1-8').value,
+                nominee_name: document.getElementById('input2-1').value,
+                age: document.getElementById('input2-2').value,
+                nominee_mobile_number: document.getElementById('input2-3').value,
+                nid_number: document.getElementById('input2-4').value,
+                birth_id: document.getElementById('input2-5').value,
+                percentage: document.getElementById('input2-6').value,
+                relation_with_member: document.getElementById('input2-7').value,
+                introducer_account: document.getElementById('input3-1').value,
+                introducer_name: document.getElementById('input3-2').value,
+                introducer_nid: document.getElementById('input3-3').value,
+                introducer_mobile_number: document.getElementById('input3-4').value,
+                remarks: document.getElementById('input3-5').value,
+                account_type: document.getElementById('input4-1').value,
+                amount: document.getElementById('input4-2').value,
+            };
+
+            // Generate review HTML
+            reviewSection.innerHTML = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                                Personal Information
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Member Code:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.member_code}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Mobile Number:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.mobile_number}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">NID Number:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.nation_id_card}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Date of Birth:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.dob}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Occupation:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.occupation}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Annual Income:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.anual_income}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Present Address:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.present_address}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Permanent Address:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.permanent_address}</td></tr>
+                    </tbody>
+                </table>
+                <br>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                                Nominee's Information
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee Name:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.nominee_name}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee Age:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.age}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee Mobile Number:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.nominee_mobile_number}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee NID No:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.nid_number}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee Birth Certificate No:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.birth_id}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Nominee Share Percentage:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.percentage}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Relation With Nominee:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.relation_with_member}</td></tr>
+                    </tbody>
+                </table>
+                <br>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                                Introducer Information
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Introducer Account:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.introducer_account}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Introducer Name:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.introducer_name}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Introducer NID:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.introducer_nid}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Introducer Mobile Number:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.introducer_mobile_number}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Remarks:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.remarks}</td></tr>
+                    </tbody>
+                </table>
+                <br>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #fff; padding: 8px; text-align: left;" colspan="2">
+                                Account Information
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Account Type:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.account_type}</td></tr>
+                        <tr><td style="border: 1px solid #fff; padding: 8px;">Amount:</td><td style="border: 1px solid #fff; padding: 8px;">${inputs.amount}</td></tr>
+                    </tbody>
+                </table>
+            `;
+        }
+    }
+
+    document.getElementById('multiStepForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this); // 'this' refers to the form element
+
+            // Convert FormData to a plain object for axios
+            const formObject = {};
+            formData.forEach((value, key) => {
+                formObject[key] = value;
+            });
+
+            axios.post('/api/customer-info', formObject)
+                .then(response => {
+                    // Show success alert
+                    showSuccessAlert('Account creation successful!', 'success');
+
+                    // Reset the form
+                    this.reset();
+                    
+                    // Navigate to the first section
+                    currentSection = 1;
+                    document.querySelector('.section.active').classList.remove('active');
+                    document.getElementById(`section${currentSection}`).classList.add('active');
+                    
+                    // Update buttons (assuming you have a function for this)
+                    updateButtons();
+                })
+                .catch(error => {
+                    // Log the error for debugging
+                    console.error('Error:', error.response ? error.response.data : error.message);
+                    
+                    // Show failure alert
+                    showFailureAlert(
+                        error.response && error.response.data.errors
+                            ? Object.values(error.response.data.errors).flat().join(' ')
+                            : 'Account Creation failed. Please try again.'
+                    );
+                });
+    });
+
+
+    // Initialize the first section as active
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById(`section${currentSection}`).classList.add('active');
+        updateButtons();
+    });
+</script>
+
+
+
+
+
+<!-- resources/views/layouts/app.blade.php -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Laravel App</title>
+    <!-- Include any required CSS/JS files -->
+</head>
+<body>
+    <!-- Your content here -->
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+        @method('POST')
+    </form>
+    <p> Username: {{$loginUser->name}} </p>
+    <button id="logout-button">Logout</button>
+
+    <script>
+        document.getElementById('logout-button').addEventListener('click', function() {
+            document.getElementById('logout-form').submit();
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+<form id="cash-deposit-form" action="{{ route('cash-deposit.store') }}" method="POST">
+    @csrf
+    <!-- Form Fields Here -->
+    <!-- ... -->
+    <div id="error-message" style="color: red;"></div>
+    <!-- Submit and Clear Buttons -->
+    <div class="form-group">
+        <button type="submit">Submit</button>
+        <button type="reset" class="clear-btn">Clear</button>
+    </div>
+</form>
+
+<script>
+document.getElementById('cash-deposit-form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const form = this;
+    const errorMessage = document.getElementById('error-message');
+    
+    // Create a FormData object from the form
+    const formData = new FormData(form);
+
+    // Perform the form submission via AJAX
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json(); // Parse JSON response
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Form submission failed.');
+            });
+        }
+    })
+    .then(data => {
+        // Assuming `session_id` is returned from the server in the JSON response
+        const sessionId = data.session_id;
+        const baseUrl = '/landing-page';
+        const redirectUrl = `${baseUrl}?session_id=${encodeURIComponent(sessionId)}`;
+        
+        showSuccessAlert('Cash Deposit Transaction successful!', 'success');
+        
+        // Clear the form fields
+        form.reset();
+        
+        // Redirect to the landing page with session ID
+        window.location.href = redirectUrl;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showFailureAlert(
+            error.message || 'Cash Deposit Transaction Failed. Please try again.',
+            'error'
+        );
+        // Optionally display error message in the DOM
+        if (errorMessage) {
+            errorMessage.textContent = error.message;
+        }
+    });
+});
+</script>
+
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profile-update-form');
+        const submitButton = document.getElementById('submit-btn');
+
+        const fields = [
+            'username', // Example field, add if needed
+            'member_code',
+            'mobile_number',
+            'nation_id_card',
+            'dob',
+            'occupation',
+            'anual_income',
+            'present_address',
+            'permanent_address',
+            'nominee_name',
+            'age',
+            'nominee_mobile_number',
+            'nid_number',
+            'birth_id',
+            'percentage',
+            'relation_with_member',
+            'introducer_account',
+            'introducer_name',
+            'introducer_nid',
+            'introducer_mobile_number',
+            'account_type',
+            'amount',
+            'remarks',
+      
+        ].map(id => document.getElementById(id));
+
+        const remarksField = document.getElementById('remarks');
+
+        function checkFields() {
+            // Check if all fields (except 'remarks') are filled
+            const allFieldsFilled = fields.every(field => field && field.value.trim() !== '');
+            const isRemarksEmpty = remarksField && remarksField.value.trim() === '';
+
+            // Hide submit button if all fields are filled
+            submitButton.style.display = allFieldsFilled ? 'none' : 'block';
+        }
+
+        // Initial check
+        checkFields();
+
+        // Add event listeners for field changes
+        fields.forEach(field => {
+            if (field) {
+                field.addEventListener('input', checkFields);
+            }
+        });
+
+        if (remarksField) {
+            remarksField.addEventListener('input', checkFields);
+        }
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json().then(data => {
+                if (response.ok) {
+                    showSuccessAlert('Account Create/Update Successful!', 'success');
+
+                    form.reset(); // Clear the form fields
+
+                    const baseUrl = '/user-profile';
+                    const sessionId = data.session_id; // Ensure `session_id` is returned from the API response
+                    const redirectUrl = `${baseUrl}?session_id=${encodeURIComponent(sessionId)}`;
+                    window.location.href = redirectUrl;
+                } else {
+                    console.error('Form submission failed with status:', response.status);
+                    showFailureAlert(
+                        data.errors
+                        ? Object.values(data.errors).flat().join(' ')
+                        : 'Profile already Updated. Thank you.',
+                        'error'
+                    );
+                }
+            }))
+            .catch(error => {
+                console.error('Error:', error);
+                showFailureAlert('Form submission failed. Please try again.', 'error');
+            });
+        });
+    });
+</script>

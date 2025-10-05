@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Step Form</title>
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+     <style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
+}
+
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    background-color: #f0f0f0;
+}
+
+.steps {
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    max-width: 1200px;
+    justify-content: center;
+}
+
+.steps li {
+    position: relative;
+    padding: 10px 20px;
+    border-radius: 4px;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.steps li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -10px;
+    width: 20px;
+    height: 2px;
+    background-color: #007bff;
+    transform: translateY(-50%);
+}
+
+.steps li.active {
+    font-weight: bold;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+    max-width: 800px;
+    margin-top: 20px;
+}
+
+.section {
+    display: none;
+    padding: 20px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
+.section.active {
+    display: block;
+}
+
+.navigation {
+    margin-top: 20px;
+}
+input[type="text"] {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: calc(100% - 22px); /* Adjust width considering padding and border */
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    margin: 0 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#submitButton {
+    background-color: #28a745;
+}
+
+#submitButton:hover {
+    background-color: #218838;
+}
+
+     </style>
+</head>
+<body>
+    <div class="header">
+        <ul class="steps">
+            <li id="step1" class="active">Step 1</li>
+            <li id="step2">Step 2</li>
+            <li id="step3">Step 3</li>
+        </ul>
+    </div>
+    
+    <div class="main-container">
+        <!-- Section 1 -->
+        <div class="section active" id="section1">
+            <h1>Section 1</h1>
+            <p>This is the content of Section 1.</p>
+            <input type="text" id="input1-1" placeholder="Input 1-1">
+            <input type="text" id="input1-2" placeholder="Input 1-2">
+        </div>
+        
+        <!-- Section 2 -->
+        <div class="section" id="section2">
+            <h1>Section 2</h1>
+            <p>This is the content of Section 2.</p>
+            <input type="text" id="input1-1" placeholder="Input 1-1" required>
+            <input type="text" id="input1-2" placeholder="Input 1-2" required>
+        </div>
+        
+        <!-- Section 3 -->
+        <div class="section" id="section3">
+            <h1>Section 3</h1>
+            <p>This is the content of Section 3.</p>
+            <input type="text" id="input3-1" placeholder="Input 3-1">
+            <input type="text" id="input3-2" placeholder="Input 3-2">
+            <button id="submitButton" style="display:none;">Submit</button>
+        </div>
+
+        <div class="navigation">
+            <button id="prevButton">Previous</button>
+            <button id="nextButton">Next</button>
+        </div>
+    </div>
+
+    <!-- <script src="script.js"></script> -->
+     <script>
+   let currentSection = 1;
+const totalSections = 3;
+
+document.getElementById('nextButton').addEventListener('click', showNextSection);
+document.getElementById('prevButton').addEventListener('click', showPreviousSection);
+
+function validateSection() {
+    const inputs = document.querySelectorAll(`#section${currentSection} input[required]`);
+    let valid = true;
+    inputs.forEach(input => {
+        if (!input.checkValidity()) {
+            valid = false;
+            input.reportValidity(); // Display validation message
+        }
+    });
+    return valid;
+}
+
+function showNextSection() {
+    if (!validateSection()) {
+        return; // Prevent moving to the next section if validation fails
+    }
+
+    document.getElementById(`section${currentSection}`).classList.remove('active');
+    document.getElementById(`step${currentSection}`).classList.remove('active');
+    
+    currentSection++;
+    if (currentSection > totalSections) {
+        currentSection = 1;
+    }
+
+    document.getElementById(`section${currentSection}`).classList.add('active');
+    document.getElementById(`step${currentSection}`).classList.add('active');
+
+    updateButtons();
+}
+
+function showPreviousSection() {
+    document.getElementById(`section${currentSection}`).classList.remove('active');
+    document.getElementById(`step${currentSection}`).classList.remove('active');
+    
+    currentSection--;
+    if (currentSection < 1) {
+        currentSection = totalSections;
+    }
+
+    document.getElementById(`section${currentSection}`).classList.add('active');
+    document.getElementById(`step${currentSection}`).classList.add('active');
+
+    updateButtons();
+}
+
+function updateButtons() {
+    const isLastSection = currentSection === totalSections;
+    document.getElementById('nextButton').style.display = isLastSection ? 'none' : 'inline-block';
+    document.getElementById('prevButton').style.display = currentSection === 1 ? 'none' : 'inline-block';
+    document.getElementById('submitButton').style.display = isLastSection ? 'inline-block' : 'none';
+}
+
+function submitForm() {
+    // Collecting data from all sections
+    const data = {
+        section1: {
+            input1: document.getElementById('input1-1').value,
+            input2: document.getElementById('input1-2').value
+        },
+        section2: {
+            input1: document.getElementById('input2-1').value,
+            input2: document.getElementById('input2-2').value
+        },
+        section3: {
+            input1: document.getElementById('input3-1').value,
+            input2: document.getElementById('input3-2').value
+        }
+    };
+
+    console.log('Form Submitted:', data);
+    alert('Form Submitted! Check the console for data.');
+}
+
+// Initialize the first section as active
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById(`section${currentSection}`).classList.add('active');
+    document.getElementById(`step${currentSection}`).classList.add('active');
+    updateButtons();
+});
+
+     </script>
+</body>
+</html>
