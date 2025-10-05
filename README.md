@@ -19,8 +19,9 @@
 
 
 ### 1. Install Composer (In Your Project)
-- composer install  <br/>
-> **If facing any problem:**
+>>> composer install  <br/>
+
+> ##### **_If facing any problem:_**
 1. Open PHP configuration file:
     - Navigate to C:\xampp\php\php.ini
     - Open it with a text editor (like Notepad++ or VS Code)
@@ -34,7 +35,10 @@
     - Open XAMPP Control Panel
     - Stop Apache
     - Start Apache again
-    - Start MySQL
+    - Start MySQL <br/>
+
+Then run the following command again:<br/>
+>>>> composer install
 
 ## 2. .env Configuration
     1. Create .env file
